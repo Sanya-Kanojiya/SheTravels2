@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+
+  --color-cream: #f6f1ea;
+  --color-cream-deep: #efe6db;
+  --color-sage: #d4e8dc;
+  --color-sage-deep: #b7d4c4;
+  --color-forest: #1b3a2f;
+  --color-ink: #24312b;
+  --color-coral: #e06a55;
+  --color-coral-dark: #c85a47;
+  --color-lilac: #e6dcf3;
+  --color-peach: #f4d6c4;
+  --color-muted: #6b7c74;
+  --color-card: #fffdf9;
+  --color-sos: #d64545;
+  --color-line: #e4ddd4;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.dot-grid {
+  background-image: radial-gradient(rgba(27, 58, 47, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.route-dash {
+  stroke-dasharray: 6 8;
+}
