@@ -14,10 +14,21 @@ export default function LoginPage() {
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(true);
 
-  const onSubmit = (e) => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const user = login(email || "aanya@shetravels.ai");
-    navigate(user.role === "admin" ? "/admin" : "/dashboard");
+    setError("");
+    setLoading(true);
+    try {
+      const nextUser = await login(email, password);
+      navigate(nextUser.role === "admin" ? "/admin" : "/dashboard");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,8 +135,9 @@ export default function LoginPage() {
           />
           Keep me signed in on this device
         </label>
-        <Button type="submit" className="w-full">
-          Continue to my trips →
+        {error ? <p className="text-sm text-sos">{error}</p> : null}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Signing in…" : "Continue to my trips →"}
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
@@ -135,7 +147,7 @@ export default function LoginPage() {
         </Link>
       </p>
       <p className="mt-6 text-center text-xs text-muted">
-        Demo login accepts any email. Use admin@shetravels.ai for the admin panel.
+        Use a registered account. Register with admin@shetravels.ai to open the admin desk.
       </p>
     </AuthShell>
   );

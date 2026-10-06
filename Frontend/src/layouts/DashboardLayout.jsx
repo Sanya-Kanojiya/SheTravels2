@@ -59,8 +59,8 @@ function SideLinks({ onNavigate }) {
       <button
         type="button"
         className="mt-auto flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-medium text-coral hover:bg-white/70"
-        onClick={() => {
-          logout();
+        onClick={async () => {
+          await logout();
           onNavigate?.();
           navigate("/");
         }}

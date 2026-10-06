@@ -41,8 +41,8 @@ export default function AdminLayout() {
             <button
               type="button"
               className="mt-auto flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-peach"
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 navigate("/");
               }}
             >

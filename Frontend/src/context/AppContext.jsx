@@ -1,63 +1,67 @@
-import { createContext, useContext, useMemo, useState } from "react";
-import { communityPosts as seedPosts, contacts as seedContacts, trips as seedTrips } from "../data/mock";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import api from "../services/api";
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [trips, setTrips] = useState(seedTrips);
-  const [contacts, setContacts] = useState(seedContacts);
-  const [posts, setPosts] = useState(seedPosts);
+  const [ready, setReady] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  const notify = (message, type = "success") => {
+  const notify = (message) => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 2800);
   };
 
-  const login = (email, name) => {
-    const isAdmin = email.toLowerCase().includes("admin");
-    const nextUser = {
-      id: isAdmin ? "admin-1" : "u-1",
-      name: isAdmin ? "SheTravels Admin" : name || "Aanya Mehra",
-      email,
-      role: isAdmin ? "admin" : "traveller",
-    };
+  useEffect(() => {
+    api
+      .get("/auth/me")
+      .then((res) => setUser(res.data.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setReady(true));
+  }, []);
+
+  const login = async (email, password) => {
+    const res = await api.post("/auth/login", { email, password });
+    const nextUser = res.data.data.user;
     setUser(nextUser);
-    notify(isAdmin ? "Welcome to the admin desk." : "Signed in. Your plans are ready.");
+    notify(nextUser.role === "admin" ? "Welcome to the admin desk." : "Signed in. Your plans are ready.");
     return nextUser;
   };
 
-  const logout = () => {
-    setUser(null);
-    notify("You have been signed out.", "info");
+  const register = async ({ name, email, password }) => {
+    const res = await api.post("/auth/register", { name, email, password });
+    const nextUser = res.data.data.user;
+    setUser(nextUser);
+    notify("Account created. Welcome to SheTravels.");
+    return nextUser;
   };
 
-  const addTrip = (trip) => {
-    setTrips((prev) => [trip, ...prev]);
-    notify("Trip saved to My Trips.");
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // cookie may already be gone
+    }
+    setUser(null);
+    notify("You have been signed out.");
   };
 
   const value = useMemo(
     () => ({
       user,
       setUser,
-      trips,
-      setTrips,
-      addTrip,
-      contacts,
-      setContacts,
-      posts,
-      setPosts,
+      ready,
       toasts,
       notify,
       login,
+      register,
       logout,
     }),
-    [user, trips, contacts, posts, toasts],
+    [user, ready, toasts],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
