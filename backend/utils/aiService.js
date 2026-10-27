@@ -62,50 +62,112 @@ function mockItinerary({ destination, startDate, endDate, duration, interests, t
 }
 
 async function generateItinerary(input) {
-  const apiKey = process.env.AI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
+
+  console.log("AI INPUT:", input);
+  console.log("GROQ KEY EXISTS:", !!apiKey);
+
   if (!apiKey) {
-    return mockItinerary(input);
+    throw new Error("GROQ_API_KEY is missing");
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.6,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You help women travellers plan trips (solo, friends, family, or group). Reply with JSON only.",
-          },
-          {
-            role: "user",
-            content: `Create a travel plan as JSON with keys: destination, summary, itinerary (array of {day,title,items[]}), placesToVisit[], suggestions[], safetyTips[], recommendations[]. Input: ${JSON.stringify(input)}`,
-          },
-        ],
-      }),
-    });
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b",
+          temperature: 0.7,
+          messages: [
+            {
+              role: "system",
+              content: `
+You are an expert travel planner for women travelers.
+
+Create a practical, destination-specific travel itinerary.
+
+IMPORTANT:
+- Every day must have DIFFERENT activities.
+- Do NOT repeat the same activity on multiple days.
+- Use the actual destination and user's interests.
+- Include realistic attractions, food experiences, local activities and sightseeing.
+- Consider the travel style, budget and dates.
+- Include safety-conscious suggestions.
+- Return ONLY valid JSON.
+              `,
+            },
+            {
+              role: "user",
+              content: `
+Create a personalized travel plan using this input:
+
+${JSON.stringify(input)}
+
+Return exactly this JSON structure:
+
+{
+  "destination": "string",
+  "summary": "string",
+  "itinerary": [
+    {
+      "day": 1,
+      "title": "string",
+      "items": [
+        "string",
+        "string",
+        "string",
+        "string"
+      ]
+    }
+  ],
+  "placesToVisit": ["string"],
+  "suggestions": ["string"],
+  "safetyTips": ["string"],
+  "recommendations": ["string"]
+}
+
+The number of itinerary days must match the trip duration.
+              `,
+            },
+          ],
+        }),
+      }
+    );
 
     if (!response.ok) {
-      return mockItinerary(input);
+      const errorText = await response.text();
+
+      console.error("GROQ API ERROR:", response.status, errorText);
+
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     const body = await response.json();
+
     const text = body.choices?.[0]?.message?.content || "";
-    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+
+    console.log("GROQ RESPONSE RECEIVED");
+
+    const cleaned = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
     return {
-      ...mockItinerary(input),
       ...parsed,
-      days: parsed.itinerary || parsed.days,
+      days: parsed.itinerary || [],
       usedFallback: false,
     };
-  } catch (_err) {
-    return mockItinerary(input);
+  } catch (err) {
+    console.error("GROQ ITINERARY ERROR:", err);
+    throw err;
   }
 }
 

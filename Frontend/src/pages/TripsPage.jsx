@@ -18,7 +18,12 @@ export default function TripsPage() {
   const visible = useMemo(() => {
     return trips.filter((trip) => {
       const matchQ = trip.destination.toLowerCase().includes(q.toLowerCase());
-      const matchF = filter === "All" || trip.status === filter;
+      // const matchF = filter === "All" || trip.status === filter;
+      const matchF =
+        filter === "All" ||
+        (filter === "Upcoming" && trip.status === "planned") ||
+        (filter === "Planning" && trip.status === "ongoing") ||
+        (filter === "Completed" && trip.status === "completed");
       return matchQ && matchF;
     });
   }, [trips, q, filter]);
@@ -48,9 +53,8 @@ export default function TripsPage() {
               key={item}
               type="button"
               onClick={() => setFilter(item)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${
-                filter === item ? "bg-forest text-white" : "bg-white text-forest"
-              }`}
+              className={`rounded-full px-4 py-2 text-sm font-medium ${filter === item ? "bg-forest text-white" : "bg-white text-forest"
+                }`}
             >
               {item}
             </button>
@@ -71,7 +75,7 @@ export default function TripsPage() {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {visible.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+            <TripCard key={trip._id || trip.id} trip={trip} />
           ))}
         </div>
       )}

@@ -4,8 +4,9 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import ItineraryCard from "../components/ItineraryCard";
-import { mockGeneratedItinerary } from "../data/mock";
+
 import { useApp } from "../context/AppContext";
+import api from "../services/api";
 
 export default function CreateTripPage() {
   const { addTrip } = useApp();
@@ -22,11 +23,28 @@ export default function CreateTripPage() {
 
   const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
-  const generate = (e) => {
+
+  const generate = async (e) => {
     e.preventDefault();
-    const dest = form.destination || "Udaipur, Rajasthan";
-    const generated = mockGeneratedItinerary(dest, 4);
-    setPlan(generated);
+    console.log("🔥 GENERATE BUTTON CLICKED");
+    try {
+      const response = await api.post("/trips/generate", {
+        destination: form.destination,
+        startDate: form.startDate,
+        endDate: form.endDate,
+        budget: form.budget,
+        interests: form.interests,
+        travelType: "Solo",
+        travelStyle: form.style,
+      });
+
+      console.log("✅ BACKEND RESPONSE:", response.data);
+
+      setPlan(response.data.data.plan);
+    } catch (error) {
+      console.error("❌ GENERATE ERROR:", error);
+      alert(error.message || "Failed to generate trip");
+    }
   };
 
   const save = () => {
@@ -39,7 +57,7 @@ export default function CreateTripPage() {
       endDate: form.endDate || "TBD",
       budget: Number(form.budget) || 25000,
       currency: "INR",
-      status: "Planning",
+      status: "planned",
       style: form.style,
       coverTone: "lilac",
       safetyScore: 80,
@@ -51,6 +69,8 @@ export default function CreateTripPage() {
     navigate("/trips");
   };
 
+
+  
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>

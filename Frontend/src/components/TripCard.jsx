@@ -27,7 +27,7 @@ export default function TripCard({ trip }) {
           ₹{trip.budget.toLocaleString("en-IN")}
         </p>
         <Link
-          to={`/trips/${trip.id}`}
+          to={`/trips/${trip._id || trip.id}`}
           className="inline-flex items-center gap-2 text-sm font-semibold text-coral hover:text-coral-dark"
         >
           View trip <ArrowRight className="h-4 w-4" />

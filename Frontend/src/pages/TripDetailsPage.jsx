@@ -9,7 +9,9 @@ import { useApp } from "../context/AppContext";
 export default function TripDetailsPage() {
   const { id } = useParams();
   const { trips } = useApp();
-  const trip = trips.find((item) => item.id === id);
+  const trip = trips.find(
+    (item) => String(item._id || item.id) === id
+  );
 
   if (!trip) {
     return (
@@ -61,7 +63,7 @@ export default function TripDetailsPage() {
           <Card className="p-5">
             <h3 className="font-display text-xl text-forest">Places to visit</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted">
-              {trip.places.map((place) => (
+              {(trip.places || []).map((place) => (
                 <li key={place}>• {place}</li>
               ))}
             </ul>
@@ -69,7 +71,7 @@ export default function TripDetailsPage() {
           <Card className="p-5">
             <h3 className="font-display text-xl text-forest">Safety tips</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted">
-              {trip.safetyTips.map((tip) => (
+              {(trip.safetyTips || []).map((tip) => (
                 <li key={tip}>• {tip}</li>
               ))}
             </ul>
