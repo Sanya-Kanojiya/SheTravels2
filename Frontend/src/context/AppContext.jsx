@@ -8,6 +8,7 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [trips, setTrips] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [ready, setReady] = useState(false);
   const [toasts, setToasts] = useState([]);
 
@@ -156,7 +157,7 @@ export function AppProvider({ children }) {
 
     const nextUser = res.data.data.user;
 
-    setUser(nextUser);
+    setUser(nextUser); 
 
     // Load trips and contacts after login
     await Promise.all([fetchTrips(), fetchContacts()]);
@@ -217,6 +218,8 @@ export function AppProvider({ children }) {
 
     contacts,
     setContacts,
+    posts,
+    setPosts,
     fetchContacts,
     addContact,
     updateContact,
