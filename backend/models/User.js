@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
     lastCheckIn: { type: Date, default: null },
     sosActive: { type: Boolean, default: false },
     lastSosAt: { type: Date, default: null },
+
+    sosLocation: {
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null },
+    },
+
   },
   { timestamps: true },
 );

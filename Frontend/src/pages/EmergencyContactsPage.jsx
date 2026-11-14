@@ -10,6 +10,7 @@ const empty = {
   name: "",
   relationship: "",
   phone: "",
+  email: ""
 };
 
 export default function EmergencyContactsPage() {
@@ -51,7 +52,7 @@ export default function EmergencyContactsPage() {
 
       notify(
         error.response?.data?.message ||
-          "Unable to save contact. Please try again."
+        "Unable to save contact. Please try again."
       );
     } finally {
       setSaving(false);
@@ -66,6 +67,7 @@ export default function EmergencyContactsPage() {
       name: contact.name || "",
       relationship: contact.relationship || "",
       phone: contact.phone || "",
+      email: contact.email || "",
     });
 
     setOpen(true);
@@ -81,7 +83,7 @@ export default function EmergencyContactsPage() {
 
       notify(
         error.response?.data?.message ||
-          "Unable to delete contact. Please try again."
+        "Unable to delete contact. Please try again."
       );
     }
   };
@@ -163,6 +165,13 @@ export default function EmergencyContactsPage() {
             onChange={(e) =>
               setForm({ ...form, phone: e.target.value })
             }
+          />
+
+          <Input
+            label="Email Address"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
 
           <Button
